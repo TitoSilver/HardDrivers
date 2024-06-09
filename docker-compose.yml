@@ -7,15 +7,12 @@ services:
       - "3306"
     ports:
       - "3306:3306"
-    env_file:
-      - .env
     environment:
-      - MYSQL_USER=$${MYSQL_USER}
-      - MYSQL_PASSWORD=$${MYSQL_PASSWORD}
-      - MYSQL_DATABASE=$${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=$${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
-      - db:/var/lib/mysql
-      - /tmp/app/mysqld:/var/run/mysqld
+      - my-db:/var/lib/mysql
 volumes:
-  db: 
+  my-db:
