@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    environment:
+      - MYSQL_USER=$${MYSQL_USER}
+      - MYSQL_PASSWORD=$${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=$${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=$${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db:/var/lib/mysql
+      - /tmp/app/mysqld:/var/run/mysqld
+volumes:
+  db: 
