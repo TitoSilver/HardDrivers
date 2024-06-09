@@ -1,6 +1,6 @@
 import logging
 import unicodedata
-from asyncio import as_completed, run
+from asyncio import as_completed
 from typing import AsyncIterable, Literal
 
 from httpx import Response
@@ -57,6 +57,7 @@ class Kavak(Scrapper):
                 ars_price=float(
                     unicodedata.normalize("NFKD", car["price"]).replace('$', '').replace('.', '')
                 ),
+                scrapping_dttm=self.scrapping_dttm
             )
         if car_obj.id in self.scrapped_items:
             logger.info("Car %s %s repeated", car_obj.full_name, car_obj.full_name)

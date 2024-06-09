@@ -1,4 +1,5 @@
 import hashlib
+from datetime import datetime
 from typing import Literal
 
 
@@ -16,6 +17,7 @@ class Car:
     full_name: str
     ars_price: float
     usd_price: float | None
+    scrapping_dttm: datetime
 
     def __init__(
         self,
@@ -28,6 +30,7 @@ class Car:
         model: str,
         full_name: str,
         ars_price: float,
+        scrapping_dttm: datetime,
         color: str | None=None,
         images: list[str] | None=None,
         transmission: Literal["Manual", "Automatic"] | None=None,
@@ -46,6 +49,7 @@ class Car:
         self.full_name = full_name
         self.ars_price = ars_price
         self.usd_price = usd_price
+        self.scrapping_dttm = scrapping_dttm
 
     @property
     def id(self):

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime, UTC
 from typing import Any, AsyncIterable
 from logging import getLogger
 
@@ -10,10 +11,12 @@ class Scrapper(ABC):
     async_http: AsyncClient
     agency: str
     scrapped_items: set[str]
+    scrapping_dttm: datetime
 
     def __init__(self) -> None:
         self.async_http = self._http_setup()
         self.scrapped_items = set()
+        self.scrapping_dttm = datetime.now(UTC)
 
     @abstractmethod
     async def run(self) -> AsyncIterable[Any]:
