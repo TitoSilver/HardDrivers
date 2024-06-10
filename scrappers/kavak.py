@@ -18,7 +18,7 @@ class Kavak(Scrapper):
         self.agency = "Kavac"
         self.async_http.headers.update({"kavak-country-acronym": "ar"})
 
-    async def run(self) -> AsyncIterable[Car]:
+    async def _run(self) -> AsyncIterable[Car]:
         async for car in self.paginate_api():
             yield self.build_car(car)
 
@@ -41,27 +41,24 @@ class Kavak(Scrapper):
 
     def build_car(self, car: dict) -> Car:
         car_obj = Car(
-                id=car["id"],
-                agency=self.agency,
-                url=car["url"],
-                images=(
-                    [img] if (img := (car.get("image") or car.get("imageUrl"))) else None
-                ),
-                color=car.get("color"),
-                transmission=self.get_transmission(car),
-                region=car["regionName"],
-                km=car["kmNoFormat"],
-                brand=car["make"],
-                model=car["model"],
-                full_name=car["name"],
-                ars_price=float(
-                    unicodedata.normalize("NFKD", car["price"]).replace('$', '').replace('.', '')
-                ),
-                scrapping_dttm=self.scrapping_dttm
-            )
-        if car_obj.id in self.scrapped_items:
-            logger.info("Car %s %s repeated", car_obj.full_name, car_obj.full_name)
-        self.scrapped_items.add(car_obj.id)
+            id=car["id"],
+            agency=self.agency,
+            url=car["url"],
+            images=(
+                [img] if (img := (car.get("image") or car.get("imageUrl"))) else None
+            ),
+            color=car.get("color"),
+            transmission=self.get_transmission(car),
+            region=car["regionName"],
+            km=car["kmNoFormat"],
+            brand=car["make"],
+            model=car["model"],
+            full_name=car["name"],
+            ars_price=float(
+                unicodedata.normalize("NFKD", car["price"]).replace('$', '').replace('.', '')
+            ),
+            scrapping_dttm=self.scrapping_dttm
+        )
         return car_obj
 
     def get_transmission(self, car: dict) -> Literal["Manual", "Automatic"] | None:

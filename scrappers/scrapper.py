@@ -1,11 +1,16 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, UTC
-from typing import Any, AsyncIterable
+from typing import AsyncIterable
 from logging import getLogger
 
 from httpx import AsyncClient, Response
 
+from models.car import Car
+
 logger = getLogger(__name__)
+RED = "\033[91m"
+GREEN = "\033[92m"
+RESET = "\033[0m"
 
 class Scrapper(ABC):
     async_http: AsyncClient
@@ -18,8 +23,17 @@ class Scrapper(ABC):
         self.scrapped_items = set()
         self.scrapping_dttm = datetime.now(UTC)
 
+    async def run(self) -> AsyncIterable[Car]:
+        async for car in self._run():
+            if car.id in self.scrapped_items:
+                logger.info("%sCar %s %s repeated%s", RED, car.full_name, car.full_name, RESET)
+                continue
+            self.scrapped_items.add(car.id)
+            logger.info("%s[%s cars]: %s %s", GREEN, len(self.scrapped_items), car.full_name, RESET)
+            yield car
+
     @abstractmethod
-    async def run(self) -> AsyncIterable[Any]:
+    async def _run(self) -> AsyncIterable[Car]:
         pass
 
     def _http_setup(self) -> AsyncClient:
