@@ -3,6 +3,10 @@ import importlib
 from asyncio import run
 
 from scrappers.scrapper import Scrapper
+from utils.logging_handler import get_logger, setup_logger
+
+root_logger = get_logger()
+setup_logger(root_logger)
 
 # Crear un parser de argumentos
 parser = argparse.ArgumentParser(

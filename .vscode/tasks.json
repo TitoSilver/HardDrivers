@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Last log",
+            "type": "shell",
+            "command": "$lastDate=Get-ChildItem -Path 'logs' | Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty Name;Select-String -Path logs/$lastDate -Pattern '${fileBasenameNoExtension}'",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Log by date",
+            "type": "shell",
+            "command": "Select-String -Path logs/${input:date}.log -Pattern '${fileBasenameNoExtension}'",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+            },
+            "problemMatcher": []
+        },
+    ],
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "date",
+            "description": "date YYYY-MM-DD"
+        }
+    ]
+}

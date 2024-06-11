@@ -1,4 +1,3 @@
-import logging
 import unicodedata
 from asyncio import as_completed
 from typing import AsyncIterable, Literal
@@ -7,9 +6,6 @@ from httpx import Response
 
 from models.car import Car
 from scrappers.scrapper import Scrapper
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class Kavak(Scrapper):
@@ -26,6 +22,7 @@ class Kavak(Scrapper):
         url = "https://www.kavak.com/api/advanced-search-api/v2/advanced-search?page={}&url=/"
         res = await self.async_http.get(url.format(1))
         first_page = res.json()
+        self.logger.info("PEPEPPEPE")
         routines = [
             self.async_http.get(url.format(page))
             for page in range(2, first_page["pagination"]["total"] + 1)
@@ -34,7 +31,7 @@ class Kavak(Scrapper):
             yield car
         for i, task in enumerate(as_completed(routines)):
             res: Response = await task
-            logger.info("Page %s / %s", i + 1, first_page["pagination"]["total"])
+            self.logger.info("Page %s / %s", i + 1, first_page["pagination"]["total"])
             if res and (data := res.json()) and (cars := data.get("cars")):
                 for car in cars:
                     yield car

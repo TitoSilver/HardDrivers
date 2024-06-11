@@ -6,4 +6,6 @@
 
 
 */__pycache__/
-.vscode/
+.vscode/launch.json
+.vscode/settings.json
+logs/*

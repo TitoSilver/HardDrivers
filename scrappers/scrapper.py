@@ -1,16 +1,13 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import AsyncIterable
-from logging import getLogger
 
+from colorama import Fore, Style
 from httpx import AsyncClient, Response
 
 from models.car import Car
+from utils.logging_handler import get_logger
 
-logger = getLogger(__name__)
-RED = "\033[91m"
-GREEN = "\033[92m"
-RESET = "\033[0m"
 
 class Scrapper(ABC):
     async_http: AsyncClient
@@ -22,14 +19,15 @@ class Scrapper(ABC):
         self.async_http = self._http_setup()
         self.scrapped_items = set()
         self.scrapping_dttm = datetime.now(UTC)
+        self.logger = self._logger_setup()
 
     async def run(self) -> AsyncIterable[Car]:
         async for car in self._run():
             if car.id in self.scrapped_items:
-                logger.info("%sCar %s %s repeated%s", RED, car.full_name, car.full_name, RESET)
+                self.logger.info("%sCar %s %s repeated%s", Fore.RED, car.full_name, car.full_name, Style.RESET_ALL)
                 continue
             self.scrapped_items.add(car.id)
-            logger.info("%s[%s cars]: %s %s", GREEN, len(self.scrapped_items), car.full_name, RESET)
+            self.logger.info("%s[%s cars]: %s %s", Fore.GREEN, len(self.scrapped_items), car.full_name, Style.RESET_ALL)
             yield car
 
     @abstractmethod
@@ -38,7 +36,7 @@ class Scrapper(ABC):
 
     def _http_setup(self) -> AsyncClient:
         async def log_response(res: Response) -> Response:
-            logger.info("[%s][%s][redirect: %s] %s", res.status_code, res.request.method, res.is_redirect, res.request.url)
+            self.logger.info("[%s][%s][redirect: %s] %s", res.status_code, res.request.method, res.is_redirect, res.request.url)
             return res
         cli = AsyncClient(
             headers={
@@ -47,3 +45,8 @@ class Scrapper(ABC):
         )
         cli.event_hooks = {'response': [log_response]}
         return cli
+
+    @classmethod
+    def _logger_setup(cls):
+        logger = get_logger(cls.__name__)
+        return logger
