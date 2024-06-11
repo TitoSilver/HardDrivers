@@ -22,7 +22,6 @@ class Kavak(Scrapper):
         url = "https://www.kavak.com/api/advanced-search-api/v2/advanced-search?page={}&url=/"
         res = await self.async_http.get(url.format(1))
         first_page = res.json()
-        self.logger.info("PEPEPPEPE")
         routines = [
             self.async_http.get(url.format(page))
             for page in range(2, first_page["pagination"]["total"] + 1)
