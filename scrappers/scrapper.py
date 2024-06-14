@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from typing import AsyncIterable
 
 from colorama import Fore, Style
-from httpx import AsyncClient, Response
+from httpx import AsyncClient, Response, AsyncHTTPTransport
 
 from models.car import Car
 from utils.logging_handler import get_logger
@@ -23,7 +23,10 @@ class Scrapper(ABC):
 
     async def run(self) -> AsyncIterable[Car]:
         async for car in self._run():
-            if car.id in self.scrapped_items:
+            if not car:
+                self.logger.info("%sSkipped None%s", Fore.RED, Fore.RESET)
+                continue
+            elif car.id in self.scrapped_items:
                 self.logger.info("%sCar %s %s repeated%s", Fore.RED, car.full_name, car.full_name, Style.RESET_ALL)
                 continue
             self.scrapped_items.add(car.id)
@@ -31,7 +34,7 @@ class Scrapper(ABC):
             yield car
 
     @abstractmethod
-    async def _run(self) -> AsyncIterable[Car]:
+    async def _run(self) -> AsyncIterable[Car | None]:
         pass
 
     def _http_setup(self) -> AsyncClient:
@@ -41,9 +44,11 @@ class Scrapper(ABC):
         cli = AsyncClient(
             headers={
                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-            }
+            },
+            timeout=20,
+            event_hooks={'response': [log_response]},
+            transport=AsyncHTTPTransport(retries=6)
         )
-        cli.event_hooks = {'response': [log_response]}
         return cli
 
     @classmethod
