@@ -33,7 +33,6 @@ class Deruedas(Scrapper):
             for car, page_soup in page:
                 yield self.build_car(car, page_soup)
 
-
     async def get_brands(self) -> set[str]:
         res = await self.async_http.get("https://www.deruedas.com.ar/bus.asp")
         soup = BeautifulSoup(res.text, "html.parser")
