@@ -1,6 +1,6 @@
-import re
 import itertools
-from asyncio import as_completed, Semaphore
+import re
+from asyncio import Semaphore, as_completed
 from typing import AsyncIterable, Literal
 
 from bs4 import BeautifulSoup, Tag
