@@ -64,11 +64,13 @@ class Deruedas(Scrapper):
             "model": self.get_attribute(car, 'model'),
             "full_name": self.get_attribute(car, 'name'),
             "ars_price": self.get_ars_price(car),
+            "year": self.get_year(car)
         }
         if all(v is not None for v in mandatory_fields.values()):
             car_obj = Car(
-                agency=self.agency,
                 images=self.get_images(mandatory_fields['id'], page_soup),
+                fuel=self.get_fuel(mandatory_fields["id"], page_soup),
+                agency=self.agency,
                 scrapping_dttm=self.scrapping_dttm,
                 **mandatory_fields
             )
@@ -83,7 +85,8 @@ class Deruedas(Scrapper):
     def get_km(self, car: Tag) -> int | None:
         if meta := car.select_one('meta[itemprop="mileageFromOdometer"]'):
             text = meta.attrs.get('content')
-            return next((int(n) for n in re.findall(r"(\d*)", text) if n and n.isdigit()), None)
+            #api hardcoded 1 to non specified km -> 750 cars, km optional? TODO
+            return next((int(n) for n in re.findall(r"(\d*)", text) if n and n.isdigit() and n != 1), None)
 
     def get_brand(self, car: Tag) -> str | None:
         if meta := car.select_one('div[itemprop="brand"] meta[itemprop="name"]'):
@@ -93,7 +96,7 @@ class Deruedas(Scrapper):
         if meta := car.select_one(f'meta[itemprop="{itemprop}"]'):
             return meta.attrs.get('content')
 
-    def get_year(self, car: Tag) -> int | None: #AGREGAR A CAR
+    def get_year(self, car: Tag) -> int | None:
         if meta := car.select_one('meta[itemprop="modelDate"]'):
             text = meta.attrs.get('content') or ''
             return int(text) if text.isdigit() else None
@@ -104,7 +107,7 @@ class Deruedas(Scrapper):
                 text =  meta_price.attrs.get("content")
                 return float(text) if text and text.isdigit() else None
 
-    def get_fuel(self, car_id: str, page_soup: Tag) -> str | None: #AGREGAR A CAR
+    def get_fuel(self, car_id: str, page_soup: Tag) -> str | None:
         if div := page_soup.find('div', {'id': re.compile(car_id)}):
             text = div.select_one('span.texto').text.replace('\xa0', '').strip().split('|')
             return text[0]

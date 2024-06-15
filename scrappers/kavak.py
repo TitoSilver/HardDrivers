@@ -1,10 +1,11 @@
+import re
 import unicodedata
 from asyncio import as_completed
 from typing import AsyncIterable, Literal
 
 from httpx import Response
 
-from models.car import Car, CarImage
+from models.car import Car
 from scrappers.scrapper import Scrapper
 
 
@@ -14,7 +15,7 @@ class Kavak(Scrapper):
         self.agency = "Kavac"
         self.async_http.headers.update({"kavak-country-acronym": "ar"})
 
-    async def _run(self) -> AsyncIterable[Car]:
+    async def _run(self) -> AsyncIterable[Car | None]:
         async for car in self.paginate_api():
             yield self.build_car(car)
 
@@ -35,29 +36,38 @@ class Kavak(Scrapper):
                 for car in cars:
                     yield car
 
-    def build_car(self, car: dict) -> Car:
-        car_obj = Car(
-            id=car["id"],
-            agency=self.agency,
-            url=car["url"],
-            images=(
-                [img] if (img := (car.get("image") or car.get("imageUrl"))) else None
-            ),
-            color=car.get("color"),
-            year = 0,
-            transmission=self.get_transmission(car),
-            region=car["regionName"],
-            km=car["kmNoFormat"],
-            brand=car["make"],
-            model=car["model"],
-            full_name=car["name"],
-            ars_price=float(
+    def build_car(self, car: dict) -> Car | None:
+        mandatory_fields = {
+            "id": car["id"],
+            "url": car["url"].replace('https://', ''),
+            "region": car["regionName"],
+            "km": car["kmNoFormat"],
+            "brand": car["make"],
+            "model": car["model"],
+            "full_name": car["name"],
+            "ars_price": float(
                 unicodedata.normalize("NFKD", car["price"]).replace('$', '').replace('.', '')
             ),
-            scrapping_dttm=self.scrapping_dttm
-        )
-        return car_obj
+            "year": self.get_year(car)
+        }
+        if all(v is not None for v in mandatory_fields.values()):
+            car_obj = Car(
+                **mandatory_fields,
+                agency=self.agency,
+                images=(
+                    [img] if (img := (car.get("image") or car.get("imageUrl"))) else None
+                ),
+                color=car.get("color"),
+                transmission=self.get_transmission(car),
+                scrapping_dttm=self.scrapping_dttm
+            )
+            return car_obj
 
     def get_transmission(self, car: dict) -> Literal["Manual", "Automatic"] | None:
         if tran := car.get("transmission"):
             return "Manual" if "man" in tran.lower() else "Automatic"
+
+    def get_year(self, car: dict) -> int | None:
+        if details := car.get("details"):
+            results = re.findall(r"2\d{3}", details)
+            return next((int(r) for r in results if r.isdigit()), None)

@@ -31,6 +31,8 @@ class Car(Base):
     transmission: Mapped[Optional[Literal["Manual", "Automatic"]]] = mapped_column(String(15))
     region: Mapped[str] = mapped_column(String(30))
     km: Mapped[int]
+    year: Mapped[int]
+    fuel: Mapped[Optional[str]] = mapped_column(String(30))
     brand: Mapped[str] = mapped_column(String(30))
     model: Mapped[str] = mapped_column(String(30))
     full_name: Mapped[str] = mapped_column(String(100))
