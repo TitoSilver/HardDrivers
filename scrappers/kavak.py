@@ -4,7 +4,7 @@ from typing import AsyncIterable, Literal
 
 from httpx import Response
 
-from models.car import Car
+from models.car import Car, CarImage
 from scrappers.scrapper import Scrapper
 
 
@@ -44,6 +44,7 @@ class Kavak(Scrapper):
                 [img] if (img := (car.get("image") or car.get("imageUrl"))) else None
             ),
             color=car.get("color"),
+            year = 0,
             transmission=self.get_transmission(car),
             region=car["regionName"],
             km=car["kmNoFormat"],
