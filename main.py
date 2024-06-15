@@ -1,9 +1,9 @@
 import argparse
-import enum
 import importlib
 from asyncio import run
 
 from scrappers.scrapper import Scrapper
+from scrappers.dollar import get_blue_dolar
 from utils.db import SessionDB
 from utils.logging_handler import get_logger, setup_logger
 
@@ -18,19 +18,23 @@ parser = argparse.ArgumentParser(
 
 # Agregar argumento para la ruta del archivo "scraper"
 parser.add_argument(
-    "--s", "--scraper", metavar="path", help="Ruta del archivo scraper", required=True
+    "-s", "--scraper", metavar="path", help="Ruta del archivo scraper", required=True
+)
+parser.add_argument(
+    "-t", "--test", help="Modo testing", required=False, default=False, action="store_true"
 )
 
 # Procesar los argumentos
 args = parser.parse_args()
-module = importlib.import_module(f"scrappers.{args.s}")
+module = importlib.import_module(f"scrappers.{args.scraper}")
 
-module_class = getattr(module, args.s.capitalize())
-scrapper = module_class()
+module_class = getattr(module, args.scraper.capitalize())
 
 session_db = SessionDB()
 
-async def main(scrapper: Scrapper):
+async def main():
+    usd_rate = 1000.0 if args.test else get_blue_dolar()
+    scrapper = module_class(usd_rate)
     list_car = []
     count = 0
     async for  car in scrapper.run():
@@ -44,4 +48,4 @@ async def main(scrapper: Scrapper):
     if list_car:
         session_db.save_all(list_car)
 
-run(main(scrapper))
+run(main())

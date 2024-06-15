@@ -10,8 +10,8 @@ from scrappers.scrapper import Scrapper
 
 
 class Kavak(Scrapper):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, usd_rate: float) -> None:
+        super().__init__(usd_rate)
         self.agency = "Kavac"
         self.async_http.headers.update({"kavak-country-acronym": "ar"})
 

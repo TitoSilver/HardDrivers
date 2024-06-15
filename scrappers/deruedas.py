@@ -12,8 +12,8 @@ BASE_URL = 'https://www.deruedas.com.ar'
 sem = Semaphore(2)
 
 class Deruedas(Scrapper):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, usd_rate: float) -> None:
+        super().__init__(usd_rate)
         self.agency = "Deruedas"
 
     async def _run(self) -> AsyncIterable[Car | None]:

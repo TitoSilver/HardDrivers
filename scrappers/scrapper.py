@@ -15,11 +15,12 @@ class Scrapper(ABC):
     scrapped_items: set[str]
     scrapping_dttm: datetime
 
-    def __init__(self) -> None:
+    def __init__(self, usd_rate: float) -> None:
         self.async_http = self._http_setup()
         self.scrapped_items = set()
         self.scrapping_dttm = datetime.now(UTC)
         self.logger = self._logger_setup()
+        self.usd_rate = usd_rate
 
     async def run(self) -> AsyncIterable[Car]:
         async for car in self._run():
@@ -29,6 +30,9 @@ class Scrapper(ABC):
             elif car.id in self.scrapped_items:
                 self.logger.info("%sCar %s %s repeated%s", Fore.RED, car.full_name, car.full_name, Style.RESET_ALL)
                 continue
+            # Validations & improvements
+            if not car.usd_price:
+                car.usd_price = car.ars_price / self.usd_rate
             self.scrapped_items.add(car.id)
             self.logger.info("%s[%s cars]: %s %s", Fore.GREEN, len(self.scrapped_items), car.full_name, Style.RESET_ALL)
             yield car
