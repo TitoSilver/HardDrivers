@@ -86,7 +86,7 @@ class Deruedas(Scrapper):
         if meta := car.select_one('meta[itemprop="mileageFromOdometer"]'):
             text = meta.attrs.get('content')
             #api hardcoded 1 to non specified km -> 750 cars, km optional? TODO
-            return next((int(n) for n in re.findall(r"(\d*)", text) if n and n.isdigit() and n != 1), None)
+            return next((int(n) for n in re.findall(r"(\d*)", text) if n and n.isdigit() and n != '1'), None)
 
     def get_brand(self, car: Tag) -> str | None:
         if meta := car.select_one('div[itemprop="brand"] meta[itemprop="name"]'):

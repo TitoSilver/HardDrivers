@@ -2,13 +2,15 @@ import argparse
 import importlib
 from asyncio import run
 
-from scrappers.scrapper import Scrapper
+from dotenv import load_dotenv
+
 from scrappers.dollar import get_blue_dolar
 from utils.db import SessionDB
 from utils.logging_handler import get_logger, setup_logger
 
 root_logger = get_logger()
 setup_logger(root_logger)
+load_dotenv('.env')
 
 BATCH = 1000
 # Crear un parser de argumentos

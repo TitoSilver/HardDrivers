@@ -38,6 +38,7 @@ class Car(Base):
     full_name: Mapped[str] = mapped_column(String(100))
     ars_price: Mapped[float]
     usd_price: Mapped[Optional[float]]
+    #agregar dttm
 
     def __init__(
         self,
